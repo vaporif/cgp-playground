@@ -17,9 +17,17 @@ pub trait CanGetData {
     fn get_data(self) -> String;
 }
 
-// delegate_components! {
-//     #[mark_component(IsRepositoryComponent)]
-//     RepositoryComponents {
-//         DataComponent: GetData,
-//     }
-// }
+delegate_components! {
+    // #[mark_component(IsRepositoryComponent)]
+    RepositoryComponents {
+        DataComponent: GetData,
+    }
+}
+
+pub struct GetData;
+
+impl<Context> DataGetter<Context> for GetData {
+    fn get_data(context: Context) -> String {
+        todo!()
+    }
+}
