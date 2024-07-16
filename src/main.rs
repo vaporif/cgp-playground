@@ -1,4 +1,4 @@
-use cgp_core::component::HasComponents;
+use cgp_core::prelude::*;
 
 fn main() {
     println!("Hello, world!");
@@ -11,3 +11,15 @@ impl HasComponents for Repository {
 }
 
 pub struct RepositoryComponents;
+
+#[derive_component(DataComponent, DataGetter<Context>)]
+pub trait CanGetData {
+    fn get_data(self) -> String;
+}
+
+// delegate_components! {
+//     #[mark_component(IsRepositoryComponent)]
+//     RepositoryComponents {
+//         DataComponent: GetData,
+//     }
+// }
