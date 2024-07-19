@@ -26,6 +26,24 @@ pub trait HasItem {
 */
 pub struct GetItemFromMemory;
 
+/* NOTE: Implementation finally!
+* We can add more bounds to context which in the end can require context to implement more
+* *Interface*
+*
+* In terms of OOP/DI try treating Context as a composition class inside ItemChecker
+* Context could have *Interface* requirements too, so if we sorta hack representation as OOP
+* class ItemChecker: HasItem {
+*   Context composiotion;
+*
+*   ItemChecker(Context injected) {
+*       composion = injected
+*   }
+* }
+* class Context: CanGetDB {
+* }
+*
+* You can have more nesting inside CanGetDB context too, making complex injection graphs
+*/
 impl<Context> ItemChecker<Context> for GetItemFromMemory
 where
     Context: CanGetDb,
