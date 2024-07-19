@@ -1,4 +1,4 @@
-use std::task::Context;
+use std::{marker::PhantomData, task::Context};
 
 use cgp_core::prelude::*;
 /* NOTE:
@@ -9,14 +9,14 @@ use cgp_core::prelude::*;
 fn main() {}
 
 /* NOTE: Initial wire-up
-* HasItem - Top-level *Interface*, has no implementation (is a delegator), delegates impl to ItemChecker
+* HasItem - Top-level *Interface*, shoud be attachesd to user structs, has no implementation i.e. delegates impl to ItemChecker
 * ItemChecker - Trait that implements concrete functionality, a delegatee, will copy HasItem fn's
-* ItemCheckComponent - glue trait, named wrapper around delegatee (used to have multiple
-* imlementations of HasItem for a user to select)
+* ItemCheckComponent - glue trait, named wrapper around delegatee. Exists to allow multiple
+* implementations of a delegatee.
 *
 * So in the end the chain of delegation looks like
 *
-* HasItem -> ItemCheckComponent(->ItemChecker)
+* HasItem -> ItemCheckComponent -> ItemChecker
 */
 #[derive_component(ItemCheckComponent, ItemChecker<Context>)]
 pub trait HasItem {
@@ -26,7 +26,7 @@ pub trait HasItem {
 /* NOTE: Now we can provide implementation for delegatee
 * GetItemFromMemory - 0-sized struct to hold implementaiton
 */
-pub struct GetItemFromMemory;
+pub struct GetItem;
 
 /* NOTE: Implementation finally!
 * We can add more bounds to context which in the end can require context to implement more
@@ -47,7 +47,7 @@ pub struct GetItemFromMemory;
 * You can have more nesting inside CanGetDB context too, making complex injection graphs
 * Can limit associated types too
 */
-impl<Context> ItemChecker<Context> for GetItemFromMemory
+impl<Context> ItemChecker<Context> for GetItem
 where
     Context: CanGetDb,
     for<'a> &'a <Context as CanGetDb>::Item: Into<String>,
@@ -71,7 +71,7 @@ where
 /* NOTE: More glue
 * RepositoryComponents - Sorta container from dependency injection pattern
 * Here we have final connection between GetItemFromMemory delegatee implementation
-* to ItemCheckComponent holding top level *Interface* ItemChecker
+* to ItemCheckComponent holding top level *Interface* HasItem
 *
 * In the if you want to attach container to an object the only thing you need to do is
 * impl HasComponents for Whatever {
@@ -80,11 +80,42 @@ where
 */
 pub struct RepositoryComponents;
 delegate_components!(RepositoryComponents {
-    ItemCheckComponent: GetItemFromMemory,
+    ItemCheckComponent: GetItem,
 });
 
 #[derive_component(DbGetterComponent, DbGetter<Context>)]
-pub trait CanGetDb: std::fmt::Debug {
+pub trait CanGetDb {
     type Item;
-    fn get_db(&self) -> Vec<Self::Item>;
+    fn get_db(&self) -> &Vec<Self::Item>;
+}
+
+pub struct GetDbFromMemory<ItemContext>(PhantomData<ItemContext>);
+impl<Context, ItemContext> DbGetter<Context> for GetDbFromMemory<ItemContext>
+where
+    // NOTE: Async trait is used heavily in CGP, required almost everywhere
+    ItemContext: Async,
+{
+    type Item = ItemContext;
+
+    fn get_db(context: &Context) -> &Vec<Self::Item> {
+        // Imagine you have a connection to db here
+        // lets just return default data
+        todo!()
+    }
+}
+
+#[derive(Debug)]
+struct Entity {
+    pub name: String,
+    pub value: String,
+}
+
+trait HasName {
+    fn name(&self) -> &str;
+}
+
+impl HasName for Entity {
+    fn name(&self) -> &str {
+        &self.name
+    }
 }
