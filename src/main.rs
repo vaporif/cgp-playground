@@ -1,3 +1,5 @@
+use std::task::Context;
+
 use cgp_core::prelude::*;
 /* NOTE:
 * Cgp is a mix of OOP concepts/patterns implemented in rust
@@ -47,10 +49,21 @@ pub struct GetItemFromMemory;
 impl<Context> ItemChecker<Context> for GetItemFromMemory
 where
     Context: CanGetDb,
+    for<'a> &'a <Context as CanGetDb>::Item: Into<String>,
 {
     fn has_item(context: &Context, item: String) -> bool {
         let db = context.get_db();
-        db.contains(&item)
+        let item = db
+            .iter()
+            .map(|x| {
+                let s: String = x.into();
+                s
+            })
+            .any(|x| x == item);
+
+        println!("{:?}", item);
+
+        item
     }
 }
 
@@ -70,6 +83,7 @@ delegate_components!(RepositoryComponents {
 });
 
 #[derive_component(DbGetterComponent, DbGetter<Context>)]
-pub trait CanGetDb {
-    fn get_db(&self) -> Vec<String>;
+pub trait CanGetDb: std::fmt::Debug {
+    type Item;
+    fn get_db(&self) -> Vec<Self::Item>;
 }
