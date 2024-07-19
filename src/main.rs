@@ -58,6 +58,11 @@ where
 * RepositoryComponents - Sorta container from dependency injection pattern
 * Here we have final connection between GetItemFromMemory delegatee implementation
 * to ItemCheckComponent holding top level *Interface* ItemChecker
+*
+* In the if you want to attach container to an object the only thing you need to do is
+* impl HasComponents for Whatever {
+    type Components = RepositoryComponents;
+  }
 */
 pub struct RepositoryComponents;
 delegate_components!(RepositoryComponents {
