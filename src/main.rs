@@ -83,6 +83,7 @@ delegate_components!(RepositoryComponents {
     ItemCheckComponent: GetItem,
 });
 
+// NOTE: As written before, you can place more trait bounds on context
 #[derive_component(DbGetterComponent, DbGetter<Context>)]
 pub trait CanGetDb {
     type Item;
