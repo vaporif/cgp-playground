@@ -50,6 +50,8 @@ pub struct GetItem;
 impl<Context> ItemChecker<Context> for GetItem
 where
     Context: CanGetDb,
+    // NOTE: For fans of HRTB wire up more limitations of underlying trait
+    // This should increase coupling so think twice
     for<'a> &'a <Context as CanGetDb>::Item: Into<String>,
 {
     fn has_item(context: &Context, item: String) -> bool {
@@ -81,6 +83,8 @@ where
 pub struct RepositoryComponents;
 delegate_components!(RepositoryComponents {
     ItemCheckComponent: GetItem,
+    // NOTE: Extending underlying context
+    DbGetterComponent: GetDbFromMemory<MemoryComponents>
 });
 
 // NOTE: As written before, you can place more trait bounds on context
@@ -94,7 +98,7 @@ pub struct GetDbFromMemory<ItemContext>(PhantomData<ItemContext>);
 impl<Context, ItemContext> DbGetter<Context> for GetDbFromMemory<ItemContext>
 where
     // NOTE: Async trait is used heavily in CGP, required almost everywhere
-    ItemContext: Async,
+    ItemContext: HasName + Async,
 {
     type Item = ItemContext;
 
@@ -104,6 +108,8 @@ where
         todo!()
     }
 }
+
+pub struct MemoryComponents;
 
 #[derive(Debug)]
 struct Entity {
