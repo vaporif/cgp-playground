@@ -9,7 +9,11 @@ fn main() {}
 /* NOTE: Initial wire-up
 * HasItem - Top-level *Interface*, has no implementation (is a delegator), delegates impl to ItemChecker
 * ItemChecker - Trait that implements concrete functionality, a delegatee
-* ItemCheckComponent - glue trait, holds inside link between delegator and delegatee
+* ItemCheckComponent - glue trait, named wrapper around delegatee
+*
+* So in the end the chain of delegation looks like
+*
+* HasItem -> ItemCheckComponent(->ItemChecker)
 */
 #[derive_component(ItemCheckComponent, ItemChecker<Context>)]
 pub trait HasItem {
@@ -32,7 +36,9 @@ where
 }
 
 /* NOTE: More glue
-* RepositoryComponents - Sorta container from dependency injection
+* RepositoryComponents - Sorta container from dependency injection pattern
+* Here we have final connection between GetItemFromMemory delegatee implementation
+* to ItemCheckComponent holding top level *Interface* ItemChecker
 */
 pub struct RepositoryComponents;
 delegate_components!(RepositoryComponents {
