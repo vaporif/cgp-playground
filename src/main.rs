@@ -8,8 +8,9 @@ fn main() {}
 
 /* NOTE: Initial wire-up
 * HasItem - Top-level *Interface*, has no implementation (is a delegator), delegates impl to ItemChecker
-* ItemChecker - Trait that implements concrete functionality, a delegatee
-* ItemCheckComponent - glue trait, named wrapper around delegatee
+* ItemChecker - Trait that implements concrete functionality, a delegatee, will copy HasItem fn's
+* ItemCheckComponent - glue trait, named wrapper around delegatee (used to have multiple
+* imlementations of HasItem for a user to select)
 *
 * So in the end the chain of delegation looks like
 *
