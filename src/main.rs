@@ -45,6 +45,7 @@ pub struct GetItemFromMemory;
 * }
 *
 * You can have more nesting inside CanGetDB context too, making complex injection graphs
+* Can limit associated types too
 */
 impl<Context> ItemChecker<Context> for GetItemFromMemory
 where
