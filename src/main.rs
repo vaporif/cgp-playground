@@ -1,33 +1,32 @@
+use std::u16;
+
 use cgp_core::prelude::*;
 
-fn main() {
-    println!("Hello, world!");
-}
-
-pub struct Repository;
-
-impl HasComponents for Repository {
-    type Components = RepositoryComponents;
-}
+fn main() {}
 
 pub struct RepositoryComponents;
-
-#[derive_component(DataComponent, DataGetter<Context>)]
-pub trait CanGetData {
-    fn get_data(self) -> String;
+#[derive_component(ItemGetterComponent, ItemsGetter<Context>)]
+pub trait CanFormatItems {
+    fn has_item(&mut self, item: String) -> bool;
 }
 
-delegate_components! {
-    // #[mark_component(IsRepositoryComponent)]
-    RepositoryComponents {
-        DataComponent: GetData,
+pub struct GetItemFromMemory;
+
+impl<Context> ItemsGetter<Context> for GetItemFromMemory
+where
+    Context: CanGetDb,
+{
+    fn has_item(context: &mut Context, item: String) -> bool {
+        let db = context.get_db();
+        db.contains(&item)
     }
 }
 
-pub struct GetData;
+delegate_components!(RepositoryComponents {
+    ItemGetterComponent: GetItemFromMemory,
+});
 
-impl<Context> DataGetter<Context> for GetData {
-    fn get_data(context: Context) -> String {
-        todo!()
-    }
+#[derive_component(DbGetterComponent, DbGetter<Context>)]
+pub trait CanGetDb {
+    fn get_db(&mut self) -> Vec<String>;
 }
