@@ -97,7 +97,7 @@ pub trait CanGetDb {
 pub struct GetDbFromMemory<ItemContext>(PhantomData<ItemContext>);
 impl<Context, ItemContext> DbGetter<Context> for GetDbFromMemory<ItemContext>
 where
-    // NOTE: Async trait is used heavily in CGP, required almost everywhere
+    // NOTE: Async trait is used heavily in CGP, required for associated types
     ItemContext: HasName + Async,
 {
     type Item = ItemContext;
