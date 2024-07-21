@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use cgp_core::prelude::*;
 /* NOTE:
@@ -12,16 +12,15 @@ fn main() {
         value: "random".to_string(),
     }];
 
-    let repo = Repository {
-        data: Arc::new(data),
-    };
+    let repo = Repository { data };
 
     repo.has_item("alex".to_string());
+    // repo.hello();
 }
 
 // NOTE: lets create a struct to consume cgp functionality
 struct Repository<T> {
-    data: Arc<Vec<T>>,
+    data: Vec<T>,
 }
 
 /* NOTE: Initial wire-up
@@ -40,7 +39,7 @@ pub trait HasItem {
 }
 
 /* NOTE: Now we can provide implementation for delegatee
-* GetItemFromMemory - 0-sized struct to hold implementaiton
+* GetItem - 0-sized struct to hold implementaiton
 */
 pub struct GetItem;
 
@@ -113,10 +112,10 @@ delegate_components!(RepositoryComponents {
         OrderedItemsComponent,
     ]:
     // NOTE: mixing two implementations
-    GetDbFromMemory<Entity>
+    GetDbFromMemory<Entity>,
+    NestedCallComponent: NestedComponents
 });
 
-// NOTE: As written before, you can place more trait bounds on context
 #[derive_component(OrderedItemsComponent, OrderedItemsGetter<Context>)]
 pub trait CanGetOrderedItems {
     type Item;
@@ -129,6 +128,7 @@ pub trait CanGetDb {
     fn get_all_items(&self) -> Vec<Self::Item>;
 }
 
+// NOTE: Concrete implementation for specific type
 impl ItemsGetter<Repository<Entity>> for GetDbFromMemory<Entity> {
     type Item = Entity;
 
@@ -137,6 +137,7 @@ impl ItemsGetter<Repository<Entity>> for GetDbFromMemory<Entity> {
     }
 }
 
+// NOTE: As written before, you can place more trait bounds on context
 pub struct GetDbFromMemory<ItemContext>(PhantomData<ItemContext>);
 impl<Context, ItemContext> OrderedItemsGetter<Context> for GetDbFromMemory<ItemContext>
 where
@@ -166,5 +167,23 @@ trait HasName {
 impl HasName for Entity {
     fn name(&self) -> &str {
         &self.name
+    }
+}
+
+#[derive_component(NestedCallComponent, Nested<Context>)]
+pub trait CanNestedCall {
+    fn hello() -> &'static str;
+}
+
+pub struct NestedComponents;
+delegate_components!(NestedComponents {
+    NestedCallComponent: NestedImpl
+});
+
+pub struct NestedImpl;
+
+impl<Context> Nested<Context> for NestedImpl {
+    fn hello() -> &'static str {
+        "hello"
     }
 }
