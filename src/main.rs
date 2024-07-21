@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, task::Context};
+use std::{marker::PhantomData, sync::Arc};
 
 use cgp_core::prelude::*;
 /* NOTE:
@@ -6,7 +6,23 @@ use cgp_core::prelude::*;
 * Think of it as a way to have inheritance + dependency injection
 * without a need for classes via generics + delegation pattern
 */
-fn main() {}
+fn main() {
+    let data = vec![Entity {
+        name: "alex".to_string(),
+        value: "random".to_string(),
+    }];
+
+    let repo = Repository {
+        data: Arc::new(data),
+    };
+
+    repo.has_item("alex".to_string());
+}
+
+// NOTE: lets create a struct to consume cgp functionality
+struct Repository<T> {
+    data: Arc<Vec<T>>,
+}
 
 /* NOTE: Initial wire-up
 * HasItem - Top-level *Interface*, shoud be attachesd to user structs, has no implementation i.e. delegates impl to ItemChecker
@@ -50,23 +66,12 @@ pub struct GetItem;
 impl<Context> ItemChecker<Context> for GetItem
 where
     Context: CanGetDb,
-    // NOTE: For fans of HRTB wire up more limitations of underlying trait
-    // This should increase coupling so think twice
-    for<'a> &'a <Context as CanGetDb>::Item: Into<String>,
+    // NOTE: HRTB would be hard to wire-up, keep simple
+    <Context as CanGetDb>::Item: HasName,
 {
     fn has_item(context: &Context, item: String) -> bool {
-        let db = context.get_db();
-        let item = db
-            .iter()
-            .map(|x| {
-                let s: String = x.into();
-                s
-            })
-            .any(|x| x == item);
-
-        println!("{:?}", item);
-
-        item
+        let db = context.get_all_items();
+        db.iter().any(|f| f.name() == item)
     }
 }
 
@@ -81,38 +86,75 @@ where
   }
 */
 pub struct RepositoryComponents;
+
+/* NOTE: More glue
+* Associate exposed functions from RepositoryComponents to impl struct
+*/
+impl<T> HasComponents for Repository<T>
+where
+    T: Async,
+{
+    type Components = RepositoryComponents;
+}
+
+/* NOTE: Complete dependency config
+* I.e ItemCheckComponent - dependency (HasName is an outer interface)
+* GetItem - 0-sized struct with attached implementation
+*
+* You can associate multiple dependencies wiht one implementation container
+* like with GetDbFromMemory
+*
+* You can also nest everything even more
+*/
 delegate_components!(RepositoryComponents {
     ItemCheckComponent: GetItem,
-    // NOTE: Extending underlying context
-    DbGetterComponent: GetDbFromMemory<MemoryComponents>
+    [
+        ItemsComponent,
+        OrderedItemsComponent,
+    ]:
+    // NOTE: mixing two implementations
+    GetDbFromMemory<Entity>
 });
 
 // NOTE: As written before, you can place more trait bounds on context
-#[derive_component(DbGetterComponent, DbGetter<Context>)]
-pub trait CanGetDb {
+#[derive_component(OrderedItemsComponent, OrderedItemsGetter<Context>)]
+pub trait CanGetOrderedItems {
     type Item;
-    fn get_db(&self) -> &Vec<Self::Item>;
+    fn get_ordered_items(&self) -> Vec<Self::Item>;
 }
 
-pub struct GetDbFromMemory<ItemContext>(PhantomData<ItemContext>);
-impl<Context, ItemContext> DbGetter<Context> for GetDbFromMemory<ItemContext>
-where
-    // NOTE: Async trait is used heavily in CGP, required for associated types
-    ItemContext: HasName + Async,
-{
-    type Item = ItemContext;
+#[derive_component(ItemsComponent, ItemsGetter<Context>)]
+pub trait CanGetDb {
+    type Item;
+    fn get_all_items(&self) -> Vec<Self::Item>;
+}
 
-    fn get_db(context: &Context) -> &Vec<Self::Item> {
-        // Imagine you have a connection to db here
-        // lets just return default data
-        todo!()
+impl ItemsGetter<Repository<Entity>> for GetDbFromMemory<Entity> {
+    type Item = Entity;
+
+    fn get_all_items(context: &Repository<Entity>) -> Vec<Self::Item> {
+        context.data.to_vec()
     }
 }
 
-pub struct MemoryComponents;
+pub struct GetDbFromMemory<ItemContext>(PhantomData<ItemContext>);
+impl<Context, ItemContext> OrderedItemsGetter<Context> for GetDbFromMemory<ItemContext>
+where
+    // NOTE: Async trait is used heavily in CGP, required for associated types
+    ItemContext: HasName + Clone + std::cmp::Ord + Async,
+    Context: CanGetDb<Item = ItemContext>,
+{
+    type Item = ItemContext;
 
-#[derive(Debug)]
-struct Entity {
+    fn get_ordered_items(context: &Context) -> Vec<Self::Item> {
+        let mut items = context.get_all_items();
+        items.sort();
+        items.to_vec()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Entity {
     pub name: String,
     pub value: String,
 }
