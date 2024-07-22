@@ -24,7 +24,7 @@ struct Repository<T> {
 }
 
 /* NOTE: Initial wire-up
-* HasItem - Top-level *Interface*, shoud be attachesd to user structs, has no implementation i.e. delegates impl to ItemChecker
+* HasItem - Top-level *Interface*, shoud be attached to user structs, has no implementation i.e. delegates impl to ItemChecker
 * ItemChecker - Trait that implements concrete functionality, a delegatee, will copy HasItem fn's
 * ItemCheckComponent - glue trait, named wrapper around delegatee. Exists to allow multiple
 * implementations of a delegatee.
