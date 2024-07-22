@@ -226,6 +226,7 @@ impl HasName for Entity {
 //
 
 // NOTE: Any supertraits will be bounds on &self/context
+// as first generic param is always &self
 // Any additional generic will be pushed into Delegatee
 #[derive_component(ExampleComponent, ExampleDelegatee<Context>)]
 pub trait ExampleInterface<AdditionalBound>: Supertrait {
