@@ -91,7 +91,7 @@ pub struct RepositoryComponents;
 */
 impl<T> HasComponents for Repository<T>
 where
-    T: Async,
+    T: Async, // NOTE: Async is required by cgp
 {
     type Components = RepositoryComponents;
 }
