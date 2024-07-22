@@ -113,7 +113,6 @@ delegate_components!(RepositoryComponents {
     ]:
     // NOTE: mixing two implementations
     GetDbFromMemory<Entity>,
-    NestedCallComponent: NestedComponents
 });
 
 #[derive_component(OrderedItemsComponent, OrderedItemsGetter<Context>)]
@@ -175,15 +174,24 @@ pub trait CanNestedCall {
     fn hello() -> &'static str;
 }
 
-pub struct NestedComponents;
-delegate_components!(NestedComponents {
-    NestedCallComponent: NestedImpl
-});
+// with_nested_components! {
+//     delegate_components! {
+//         RepositoryComponents {
+//             @NestedComponents: NestedComponents
+//         }
+//     }
+// }
 
-pub struct NestedImpl;
+// define_components! {
+//     NestedComponents {
+//         NestedCallComponent: NestedImpl
+//     }
+// }
 
-impl<Context> Nested<Context> for NestedImpl {
-    fn hello() -> &'static str {
-        "hello"
-    }
-}
+// pub struct NestedImpl;
+
+// impl<Context> Nested<Context> for NestedImpl {
+//     fn hello() -> &'static str {
+//         "hello"
+//     }
+// }
