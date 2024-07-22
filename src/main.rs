@@ -208,7 +208,7 @@ impl HasName for Entity {
 //
 // // NOTE: Same thing but in a legacy way
 // // Current version of cgp has this cut out
-// // but that's how it's done in hermes-sovereign relayer
+// // but that's how it's done in hermes-sdk relayer
 //
 // define_components!(
 // #[mark_component(GlueComponent)]
