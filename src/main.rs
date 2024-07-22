@@ -170,6 +170,9 @@ impl HasName for Entity {
 // NOTE: Works if defined in our repo's
 // Doesn't work here, glue missing
 
+// // NOTE: Imagine we want to add method but not directly to component
+// // but via another one and call via delegation
+// // i.e. Repository -> RepositoryComponents -> NestedComponents
 // #[derive_component(NestedCallComponent, Nested<Context>)]
 // pub trait CanNestedCall {
 //     fn hello(&self) -> &'static str;
