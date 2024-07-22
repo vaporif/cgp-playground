@@ -65,7 +65,7 @@ pub struct GetItem;
 impl<Context> ItemChecker<Context> for GetItem
 where
     Context: CanGetDb,
-    // NOTE: HRTB would be hard to wire-up, keep simple
+    // NOTE: HRTB would be hard to wire-up, keep it simple
     <Context as CanGetDb>::Item: HasName,
 {
     fn has_item(context: &Context, item: String) -> bool {
