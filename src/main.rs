@@ -226,8 +226,9 @@ impl HasName for Entity {
 //
 
 // NOTE: Any supertraits will be bounds on &self/context
+// Any additional generic will be pushed into Delegatee
 #[derive_component(ExampleComponent, ExampleDelegatee<Context>)]
-pub trait ExampleInterface: Supertrait {
+pub trait ExampleInterface<AdditionalBound>: Supertrait {
     fn has_item(&self, item: String) -> bool;
 }
 
