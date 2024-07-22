@@ -4,7 +4,7 @@ use cgp_core::prelude::*;
 /* NOTE:
 * Cgp is a mix of OOP concepts/patterns implemented in rust
 * Think of it as a way to have inheritance + dependency injection
-* without a need for classes via generics + delegation pattern
+* without a need for classes via generics/blanket impl + delegation pattern
 */
 fn main() {
     let data = vec![Entity {
