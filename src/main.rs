@@ -59,6 +59,8 @@ pub struct GetItem;
 * class Context: CanGetDB {
 * }
 *
+* &self in *Interface* always becomes &Context in impl
+*
 * You can have more nesting inside CanGetDB context too, making complex injection graphs
 * Can limit associated types too
 */
@@ -221,3 +223,12 @@ impl HasName for Entity {
 //    RepositoryComponents,
 //    NestedComponents,
 //);
+//
+
+// NOTE: Any supertraits will be bounds on &self/context
+#[derive_component(ExampleComponent, ExampleDelegatee<Context>)]
+pub trait ExampleInterface: Supertrait {
+    fn has_item(&self, item: String) -> bool;
+}
+
+pub trait Supertrait {}
