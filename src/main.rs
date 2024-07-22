@@ -102,8 +102,6 @@ where
 *
 * You can associate multiple dependencies wiht one implementation container
 * like with GetDbFromMemory
-*
-* You can also nest everything even more
 */
 delegate_components!(RepositoryComponents {
     ItemCheckComponent: GetItem,
