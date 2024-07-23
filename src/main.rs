@@ -16,6 +16,8 @@ fn main() {
 
     repo.has_item("alex".to_string());
     // repo.hello();
+
+    println!("{}", cgp_playground::delegation::delegate_example())
 }
 
 // NOTE: lets create a struct to consume cgp functionality
